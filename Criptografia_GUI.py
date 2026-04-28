@@ -5,7 +5,9 @@ import random
 import re
 from PIL import ImageGrab, ImageFilter, ImageEnhance
 
-# Lógica matemática RSA
+# ==============================================================================
+# LÓGICA MATEMÁTICA RSA
+# ==============================================================================
 def is_prime(num):
     if num < 2: return False
     for i in range(2, int(math.sqrt(num)) + 1):
@@ -24,44 +26,59 @@ def mod_inverse(e, phi):
     if gcd != 1: return None
     return (x % phi + phi) % phi
 
+# ==============================================================================
+# CONFIGURACIÓN PRINCIPAL
+# ==============================================================================
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
 
-
-# Configuración del tema de CustomTkinter (Diseño Moderno)
-ctk.set_appearance_mode("Dark")  # Opciones: "System", "Dark", "Light"
-ctk.set_default_color_theme("blue")  # Opciones: "blue", "green", "dark-blue"
-
+# ==============================================================================
+# CLASE PRINCIPAL DE LA APLICACIÓN
+# ==============================================================================
 class CriptoApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        # --- Configuración de la Ventana ---
         self.title("CriptoRSA - Desktop Edition")
         self.geometry("1300x730")
         self.minsize(1100, 680)
-
-        # Configurar grid (4 columnas proporcionales)
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        # Estado de la aplicación
+        # --- Estado de la Aplicación ---
         self.current_keys = {"n": 0, "e": 0, "d": 0}
+        self.str_log_gen = ""
+        self.str_log_e = ""
+        self.str_log_d = ""
 
-        # Encabezado
+        # --- Construcción de la Interfaz ---
+        self._build_header()
+        self._build_panel_console()
+        self._build_panel_keys()
+        self._build_panel_encrypt()
+        self._build_panel_decrypt()
+
+    # --------------------------------------------------------------------------
+    # CONSTRUCCIÓN DE LA INTERFAZ (UI BUILDERS)
+    # --------------------------------------------------------------------------
+    def _build_header(self):
         self.lbl_title = ctk.CTkLabel(self, text="🔒 CriptoRSA", font=ctk.CTkFont(family="Outfit", size=32, weight="bold"))
         self.lbl_title.grid(row=0, column=0, columnspan=4, pady=(20, 10))
 
-        # Botón de Cambio de Tema
         self.btn_theme = ctk.CTkButton(self, text="☼", width=36, height=36, corner_radius=8,
                                        fg_color=("gray86", "gray17"), hover_color=("gray75", "gray25"), 
                                        text_color=("black", "white"), font=ctk.CTkFont(size=20), 
                                        command=self.toggle_theme)
         self.btn_theme.place(x=20, y=20)
 
-        # --- PANEL 1: GENERACIÓN DE CLAVES ---
+    def _build_panel_keys(self):
         self.frame_keys = ctk.CTkFrame(self, corner_radius=15)
         self.frame_keys.grid(row=1, column=1, padx=15, pady=15, sticky="nsew")
         
         ctk.CTkLabel(self.frame_keys, text="Generar Claves", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=15)
 
+        # Primos
         frame_primes_lbl = ctk.CTkFrame(self.frame_keys, fg_color="transparent")
         frame_primes_lbl.pack(fill="x", padx=20)
         ctk.CTkLabel(frame_primes_lbl, text="Ingresa dos primos:").pack(side="left")
@@ -73,10 +90,11 @@ class CriptoApp(ctk.CTk):
         self.entry_q = ctk.CTkEntry(self.frame_keys, placeholder_text="Primo q", height=40)
         self.entry_q.pack(pady=(5, 10), padx=20, fill="x")
 
+        # Botón Generar
         self.btn_gen = ctk.CTkButton(self.frame_keys, text="Generar Par de Claves", height=45, fg_color="#a855f7", hover_color="#9333ea", command=self.generate_keys)
         self.btn_gen.pack(pady=15, padx=20, fill="x")
 
-        # Resultados de claves
+        # Resultados de n y phi
         self.lbl_n = ctk.CTkLabel(self.frame_keys, text="Módulo (n): -", font=ctk.CTkFont(family="Courier", size=13))
         self.lbl_n.pack(pady=2)
         self.lbl_phi = ctk.CTkLabel(self.frame_keys, text="Euler φ(n): -", font=ctk.CTkFont(family="Courier", size=13))
@@ -95,17 +113,19 @@ class CriptoApp(ctk.CTk):
         self.combo_d = ctk.CTkComboBox(self.frame_keys, values=[], command=self.on_d_select, state="disabled")
         self.combo_d.pack(padx=20, pady=2, fill="x")
 
+        # Claves Finales
         self.lbl_e = ctk.CTkLabel(self.frame_keys, text="Pública (e): -", text_color="#3b82f6", font=ctk.CTkFont(family="Courier", size=14, weight="bold"))
         self.lbl_e.pack(pady=(10,2))
         self.lbl_d = ctk.CTkLabel(self.frame_keys, text="Privada (d): -", text_color="#ef4444", font=ctk.CTkFont(family="Courier", size=14, weight="bold"))
         self.lbl_d.pack(pady=2)
 
-        # --- PANEL 2: CIFRADO ---
+    def _build_panel_encrypt(self):
         self.frame_enc = ctk.CTkFrame(self, corner_radius=15)
         self.frame_enc.grid(row=1, column=2, padx=15, pady=15, sticky="nsew")
 
         ctk.CTkLabel(self.frame_enc, text="Cifrar Mensaje", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=15)
 
+        # Mensaje Original
         frame_msg_lbl = ctk.CTkFrame(self.frame_enc, fg_color="transparent")
         frame_msg_lbl.pack(fill="x", padx=20)
         ctk.CTkLabel(frame_msg_lbl, text="Mensaje Original:").pack(side="left")
@@ -115,9 +135,11 @@ class CriptoApp(ctk.CTk):
         self.txt_plain = ctk.CTkTextbox(self.frame_enc, height=100, wrap="word")
         self.txt_plain.pack(pady=5, padx=20, fill="x")
 
+        # Botón Cifrar
         self.btn_enc = ctk.CTkButton(self.frame_enc, text="🔒 Encriptar", height=45, fg_color="#3b82f6", hover_color="#2563eb", command=self.encrypt_message)
         self.btn_enc.pack(pady=20, padx=20, fill="x")
 
+        # Resultado
         frame_res_lbl = ctk.CTkFrame(self.frame_enc, fg_color="transparent")
         frame_res_lbl.pack(fill="x", padx=20)
         ctk.CTkLabel(frame_res_lbl, text="Criptograma Resultante:").pack(side="left")
@@ -132,13 +154,13 @@ class CriptoApp(ctk.CTk):
         self.btn_save = ctk.CTkButton(self.frame_enc, text="💾 Guardar en Archivo", height=35, fg_color="#10b981", hover_color="#059669", command=self.save_to_file)
         self.btn_save.pack(pady=10, padx=20, fill="x")
 
-
-        # --- PANEL 3: DESCIFRADO ---
+    def _build_panel_decrypt(self):
         self.frame_dec = ctk.CTkFrame(self, corner_radius=15)
         self.frame_dec.grid(row=1, column=3, padx=15, pady=15, sticky="nsew")
 
         ctk.CTkLabel(self.frame_dec, text="Descifrar Mensaje", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=15)
 
+        # Entrada de Criptograma
         frame_cipher_in_lbl = ctk.CTkFrame(self.frame_dec, fg_color="transparent")
         frame_cipher_in_lbl.pack(fill="x", padx=20)
         ctk.CTkLabel(frame_cipher_in_lbl, text="Criptograma:").pack(side="left")
@@ -148,14 +170,17 @@ class CriptoApp(ctk.CTk):
         self.txt_cipher_in = ctk.CTkTextbox(self.frame_dec, height=80, font=ctk.CTkFont(family="Courier"))
         self.txt_cipher_in.pack(pady=5, padx=20, fill="x")
 
+        # Campos de Clave
         self.entry_n = ctk.CTkEntry(self.frame_dec, placeholder_text="Módulo (n)", height=40)
         self.entry_n.pack(pady=10, padx=20, fill="x")
         self.entry_d = ctk.CTkEntry(self.frame_dec, placeholder_text="Clave Privada (d)", height=40)
         self.entry_d.pack(pady=10, padx=20, fill="x")
 
+        # Botón Descifrar
         self.btn_dec = ctk.CTkButton(self.frame_dec, text="🔓 Descifrar", height=45, fg_color="#ef4444", hover_color="#dc2626", command=self.decrypt_message)
         self.btn_dec.pack(pady=20, padx=20, fill="x")
 
+        # Salida
         frame_out_lbl = ctk.CTkFrame(self.frame_dec, fg_color="transparent")
         frame_out_lbl.pack(fill="x", padx=20)
         ctk.CTkLabel(frame_out_lbl, text="Texto Recuperado:").pack(side="left")
@@ -165,7 +190,7 @@ class CriptoApp(ctk.CTk):
         self.txt_plain_out = ctk.CTkTextbox(self.frame_dec, height=100, font=ctk.CTkFont(size=16, weight="bold"), wrap="word")
         self.txt_plain_out.pack(pady=5, padx=20, fill="x")
 
-        # --- PANEL 4: PROCESO DETALLADO ---
+    def _build_panel_console(self):
         self.frame_proc = ctk.CTkFrame(self, corner_radius=15)
         self.frame_proc.grid(row=1, column=0, padx=15, pady=15, sticky="nsew")
 
@@ -175,14 +200,10 @@ class CriptoApp(ctk.CTk):
         self.txt_console.pack(padx=15, pady=5, fill="both", expand=True)
         self.txt_console.insert("0.0", "> Esperando generación de claves...\n")
         self.txt_console.configure(state="disabled")
-        
-        # Variables de estado para el log
-        self.str_log_gen = ""
-        self.str_log_e = ""
-        self.str_log_d = ""
 
-
-    # --- LÓGICA DE EVENTOS ---
+    # --------------------------------------------------------------------------
+    # LÓGICA DE EVENTOS PRINCIPALES
+    # --------------------------------------------------------------------------
     def toggle_theme(self):
         current_mode = ctk.get_appearance_mode()
         if current_mode == "Dark":
@@ -192,58 +213,21 @@ class CriptoApp(ctk.CTk):
             ctk.set_appearance_mode("Dark")
             self.btn_theme.configure(text="☼")
 
-    def update_console(self):
-        self.txt_console.configure(state="normal")
-        self.txt_console.delete("0.0", "end")
-        
-        if hasattr(self, 'str_log_gen') and self.str_log_gen:
-            self.txt_console.insert("end", self.str_log_gen)
-        if hasattr(self, 'str_log_e') and self.str_log_e:
-            self.txt_console.insert("end", self.str_log_e)
-        if hasattr(self, 'str_log_d') and self.str_log_d:
-            self.txt_console.insert("end", self.str_log_d)
+    def generate_random_primes(self):
+        def get_random_prime(min_val, max_val):
+            while True:
+                num = random.randint(min_val, max_val)
+                if is_prime(num):
+                    return num
+        p = get_random_prime(50, 500)
+        q = get_random_prime(50, 500)
+        while p == q:
+            q = get_random_prime(50, 500)
             
-        self.txt_console.see("end")
-        self.txt_console.configure(state="disabled")
-
-    def on_e_select(self, val):
-        if not val or not hasattr(self, 'current_phi'): return
-        e = int(val)
-        
-        self.str_log_e = (
-            f"> Selección del exponente público e: {e}\n\n"
-            f"> Determinación de d mediante Algoritmo Extendido de Euclides...\n\n"
-        )
-        
-        d0 = mod_inverse(e, self.current_phi)
-        if d0 is None: return
-        
-        possible_d = [str(d0 + k * self.current_phi) for k in range(5)]
-        self.str_log_e += f"> Posibles valores de d determinados:\n{possible_d}\n\n"
-        
-        self.str_log_d = ""
-        self.update_console()
-        
-        self.combo_d.configure(values=possible_d, state="normal")
-        self.combo_d.set(possible_d[0])
-        self.on_d_select(possible_d[0])
-
-    def on_d_select(self, val):
-        if not val: return
-        e = int(self.combo_e.get())
-        d = int(val)
-        self.current_keys = {"n": self.current_n, "e": e, "d": d}
-
-        self.str_log_d = f"> Selección de la clave privada d: {d}\n\n"
-        self.update_console()
-
-        self.lbl_e.configure(text=f"Pública (e): {e}")
-        self.lbl_d.configure(text=f"Privada (d): {d}")
-
-        self.entry_d.delete(0, 'end')
-        self.entry_d.insert(0, str(d))
-        self.entry_n.delete(0, 'end')
-        self.entry_n.insert(0, str(self.current_n))
+        self.entry_p.delete(0, 'end')
+        self.entry_p.insert(0, str(p))
+        self.entry_q.delete(0, 'end')
+        self.entry_q.insert(0, str(q))
 
     def generate_keys(self):
         try:
@@ -308,6 +292,57 @@ class CriptoApp(ctk.CTk):
         except ValueError:
             self.show_message("Error", "Por favor ingresa únicamente números enteros.", "error")
 
+    def on_e_select(self, val):
+        if not val or not hasattr(self, 'current_phi'): return
+        e = int(val)
+        
+        self.str_log_e = (
+            f"> Selección del exponente público e: {e}\n\n"
+            f"> Determinación de d mediante Algoritmo Extendido de Euclides...\n\n"
+        )
+        
+        d0 = mod_inverse(e, self.current_phi)
+        if d0 is None: return
+        
+        possible_d = [str(d0 + k * self.current_phi) for k in range(5)]
+        self.str_log_e += f"> Posibles valores de d determinados:\n{possible_d}\n\n"
+        
+        self.str_log_d = ""
+        self.update_console()
+        
+        self.combo_d.configure(values=possible_d, state="normal")
+        self.combo_d.set(possible_d[0])
+        self.on_d_select(possible_d[0])
+
+    def on_d_select(self, val):
+        if not val: return
+        e = int(self.combo_e.get())
+        d = int(val)
+        self.current_keys = {"n": self.current_n, "e": e, "d": d}
+
+        self.str_log_d = f"> Selección de la clave privada d: {d}\n\n"
+        self.update_console()
+
+        self.lbl_e.configure(text=f"Pública (e): {e}")
+        self.lbl_d.configure(text=f"Privada (d): {d}")
+
+        self.entry_d.delete(0, 'end')
+        self.entry_d.insert(0, str(d))
+        self.entry_n.delete(0, 'end')
+        self.entry_n.insert(0, str(self.current_n))
+
+    def generate_spy_message(self):
+        messages = [
+            "El águila ha aterrizado en el nido.",
+            "Nos vemos en el punto de extracción a las 0400.",
+            "El paquete fue entregado sin contratiempos.",
+            "Abortar misión. Repito, abortar misión.",
+            "La llave está debajo de la maceta azul.",
+            "Operación 'Sombra Nocturna' iniciada."
+        ]
+        self.txt_plain.delete("0.0", "end")
+        self.txt_plain.insert("0.0", random.choice(messages))
+
     def encrypt_message(self):
         text = self.txt_plain.get("0.0", "end-1c")
         if not text:
@@ -347,30 +382,6 @@ class CriptoApp(ctk.CTk):
         self.txt_cipher_in.delete("0.0", "end")
         self.txt_cipher_in.insert("0.0", cipher_str)
 
-    def save_to_file(self):
-        cipher_text = self.txt_cipher_out.get("0.0", "end-1c").strip()
-        if not cipher_text:
-            self.show_message("Atención", "No hay ningún mensaje cifrado para guardar.", "warning")
-            return
-            
-        file_path = filedialog.asksaveasfilename(
-            defaultextension=".txt",
-            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
-            title="Guardar Criptograma y Clave Privada"
-        )
-        
-        if file_path:
-            try:
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write("--- MENSAJE CIFRADO (CRIPTOGRAMA) ---\n")
-                    f.write(cipher_text + "\n\n")
-                    f.write("--- CLAVE PRIVADA PARA DESCIFRAR ---\n")
-                    f.write(f"Módulo (n): {self.current_keys['n']}\n")
-                    f.write(f"Clave Privada (d): {self.current_keys['d']}\n")
-                self.show_message("Éxito", "El archivo se ha guardado correctamente.\nCompártelo junto con la clave privada.", "success")
-            except Exception as err:
-                self.show_message("Error", f"No se pudo guardar el archivo:\n{err}", "error")
-
     def decrypt_message(self):
         cipher_str = self.txt_cipher_in.get("0.0", "end-1c").strip()
         
@@ -400,33 +411,32 @@ class CriptoApp(ctk.CTk):
         except Exception as err:
             self.show_message("Error de Descifrado", f"Ha ocurrido un error:\n{err}", "error")
 
-    def generate_spy_message(self):
-        messages = [
-            "El águila ha aterrizado en el nido.",
-            "Nos vemos en el punto de extracción a las 0400.",
-            "El paquete fue entregado sin contratiempos.",
-            "Abortar misión. Repito, abortar misión.",
-            "La llave está debajo de la maceta azul.",
-            "Operación 'Sombra Nocturna' iniciada."
-        ]
-        self.txt_plain.delete("0.0", "end")
-        self.txt_plain.insert("0.0", random.choice(messages))
-
-    def generate_random_primes(self):
-        def get_random_prime(min_val, max_val):
-            while True:
-                num = random.randint(min_val, max_val)
-                if is_prime(num):
-                    return num
-        p = get_random_prime(50, 500)
-        q = get_random_prime(50, 500)
-        while p == q:
-            q = get_random_prime(50, 500)
+    # --------------------------------------------------------------------------
+    # UTILIDADES (ARCHIVOS Y PORTAPAPELES)
+    # --------------------------------------------------------------------------
+    def save_to_file(self):
+        cipher_text = self.txt_cipher_out.get("0.0", "end-1c").strip()
+        if not cipher_text:
+            self.show_message("Atención", "No hay ningún mensaje cifrado para guardar.", "warning")
+            return
             
-        self.entry_p.delete(0, 'end')
-        self.entry_p.insert(0, str(p))
-        self.entry_q.delete(0, 'end')
-        self.entry_q.insert(0, str(q))
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
+            title="Guardar Criptograma y Clave Privada"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write("--- MENSAJE CIFRADO (CRIPTOGRAMA) ---\n")
+                    f.write(cipher_text + "\n\n")
+                    f.write("--- CLAVE PRIVADA PARA DESCIFRAR ---\n")
+                    f.write(f"Módulo (n): {self.current_keys['n']}\n")
+                    f.write(f"Clave Privada (d): {self.current_keys['d']}\n")
+                self.show_message("Éxito", "El archivo se ha guardado correctamente.\nCompártelo junto con la clave privada.", "success")
+            except Exception as err:
+                self.show_message("Error", f"No se pudo guardar el archivo:\n{err}", "error")
 
     def load_from_file(self):
         file_path = filedialog.askopenfilename(
@@ -469,6 +479,23 @@ class CriptoApp(ctk.CTk):
             self.update()
             self.show_message("Copiado", "Texto copiado al portapapeles exitosamente.", "success")
 
+    # --------------------------------------------------------------------------
+    # COMPONENTES VISUALES ADICIONALES (CONSOLA, MODALES)
+    # --------------------------------------------------------------------------
+    def update_console(self):
+        self.txt_console.configure(state="normal")
+        self.txt_console.delete("0.0", "end")
+        
+        if hasattr(self, 'str_log_gen') and self.str_log_gen:
+            self.txt_console.insert("end", self.str_log_gen)
+        if hasattr(self, 'str_log_e') and self.str_log_e:
+            self.txt_console.insert("end", self.str_log_e)
+        if hasattr(self, 'str_log_d') and self.str_log_d:
+            self.txt_console.insert("end", self.str_log_d)
+            
+        self.txt_console.see("end")
+        self.txt_console.configure(state="disabled")
+
     def show_calculations(self):
         if not hasattr(self, 'last_encryption_trace') or not self.last_encryption_trace:
             self.show_message("Información", "Primero debes encriptar un mensaje.", "info")
@@ -481,29 +508,22 @@ class CriptoApp(ctk.CTk):
         w_main = self.winfo_width()
         h_main = self.winfo_height()
 
-        # 1. Capa de oscurecimiento y desenfoque real (backdrop con Pillow)
+        # 1. Capa de oscurecimiento y desenfoque
         backdrop = ctk.CTkToplevel(self)
         backdrop.overrideredirect(True)
         backdrop.geometry(f"{w_main}x{h_main}+{x_root}+{y_root}")
         backdrop.transient(self)
         
         try:
-            # Tomar una "foto" exacta de lo que hay en las coordenadas de la ventana principal
             img = ImageGrab.grab(bbox=(x_root, y_root, x_root + w_main, y_root + h_main))
-            # Aplicar filtro de borrosidad (Gaussian Blur)
             img = img.filter(ImageFilter.GaussianBlur(radius=8))
-            # Oscurecer la imagen al 40% para que la ventana modal resalte más
             img = ImageEnhance.Brightness(img).enhance(0.4)
             
-            # Convertirla y ponerla de fondo
             bg_image = ctk.CTkImage(light_image=img, size=(w_main, h_main))
             bg_label = ctk.CTkLabel(backdrop, text="", image=bg_image)
             bg_label.pack(fill="both", expand=True)
-            
-            # Guardamos la referencia para que no se borre la imagen de la memoria RAM
             backdrop.bg_image = bg_image
         except Exception:
-            # Plan B (por si falla en algún PC): Transparencia normal sin desenfoque
             backdrop.configure(fg_color="#050505")
             backdrop.attributes("-alpha", 0.75)
 
@@ -514,26 +534,18 @@ class CriptoApp(ctk.CTk):
         win.attributes("-topmost", True)
         win.configure(fg_color="#2b2b2b")
         
-        # Centrar la ventana emergente sobre la principal
         win_w, win_h = 800, 450
         x_win = x_root + (w_main // 2) - (win_w // 2)
         y_win = y_root + (h_main // 2) - (win_h // 2)
         win.geometry(f"{win_w}x{win_h}+{x_win}+{y_win}")
 
-        # Sincronizar movimiento de ventanas para evitar que el desenfoque se separe
         def sync_windows(event):
-            if event.widget != self:
-                return
-            if not win.winfo_exists() or not backdrop.winfo_exists():
-                return
-            x = self.winfo_rootx()
-            y = self.winfo_rooty()
-            w = self.winfo_width()
-            h = self.winfo_height()
+            if event.widget != self: return
+            if not win.winfo_exists() or not backdrop.winfo_exists(): return
+            x, y = self.winfo_rootx(), self.winfo_rooty()
+            w, h = self.winfo_width(), self.winfo_height()
             backdrop.geometry(f"{w}x{h}+{x}+{y}")
-            x_w = x + (w // 2) - (win_w // 2)
-            y_w = y + (h // 2) - (win_h // 2)
-            win.geometry(f"{win_w}x{win_h}+{x_w}+{y_w}")
+            win.geometry(f"{win_w}x{win_h}+{x + (w // 2) - (win_w // 2)}+{y + (h // 2) - (win_h // 2)}")
 
         bind_id = self.bind("<Configure>", sync_windows, add="+")
 
@@ -548,22 +560,19 @@ class CriptoApp(ctk.CTk):
         win.lift()
         win.focus()
 
-        # 3. Frame principal para darle borde a la ventana completa
+        # 3. Frame principal
         main_frame = ctk.CTkFrame(win, border_width=2, border_color="#3f3f46", corner_radius=0, fg_color="#2b2b2b")
         main_frame.pack(fill="both", expand=True)
 
         lbl_title = ctk.CTkLabel(main_frame, text="📊 Trazabilidad de Cifrado (Decimal a Criptograma)", font=ctk.CTkFont(size=20, weight="bold"), text_color="#4ade80")
         lbl_title.pack(pady=(20, 10))
 
-        # Contenedor principal de la tabla con borde
         table_container = ctk.CTkFrame(main_frame, border_width=1, border_color="#3f3f46", corner_radius=10, fg_color="#242424")
         table_container.pack(padx=30, pady=10, fill="both", expand=True)
 
-        # Encabezados fijos
         header_frame = ctk.CTkFrame(table_container, fg_color="transparent")
         header_frame.pack(fill="x", padx=(2, 18), pady=(10, 5))
 
-        # Scrollable data
         scroll_frame = ctk.CTkScrollableFrame(table_container, fg_color="transparent")
         scroll_frame.pack(fill="both", expand=True, padx=2, pady=2)
 
@@ -571,16 +580,13 @@ class CriptoApp(ctk.CTk):
             header_frame.grid_columnconfigure(i, weight=1)
             scroll_frame.grid_columnconfigure(i, weight=1)
 
-        # Headers (ahora en header_frame)
         headers = ["Carácter", "Unicode (m)", "Ecuación (m^e mod n)", "Cifrado (c)"]
         for i, h in enumerate(headers):
             lbl = ctk.CTkLabel(header_frame, text=h, font=ctk.CTkFont(weight="bold", size=14))
             lbl.grid(row=0, column=i, sticky="nsew")
 
-        # Data
         for row_idx, row_data in enumerate(self.last_encryption_trace):
             real_row = row_idx * 2
-            # Línea separadora superior para la fila
             line = ctk.CTkFrame(scroll_frame, height=1, fg_color="#3f3f46")
             line.grid(row=real_row, column=0, columnspan=4, sticky="ew", padx=10)
 
@@ -589,13 +595,11 @@ class CriptoApp(ctk.CTk):
             ctk.CTkLabel(scroll_frame, text=row_data["eq"], text_color="#a1a1aa", font=ctk.CTkFont(family="Courier", size=13)).grid(row=real_row+1, column=2, pady=10)
             ctk.CTkLabel(scroll_frame, text=str(row_data["c"]), text_color="#3b82f6", font=ctk.CTkFont(weight="bold", size=14)).grid(row=real_row+1, column=3, pady=10)
 
-        # Función para cerrar ambas ventanas
         def close_modal():
             try:
                 self.unbind("<Configure>", bind_id)
                 self.unbind("<FocusIn>", focus_bind_id)
-            except:
-                pass
+            except: pass
             win.destroy()
             backdrop.destroy()
             self.focus_force()
@@ -607,14 +611,9 @@ class CriptoApp(ctk.CTk):
         msg_box = ctk.CTkToplevel(self)
         msg_box.title(title)
         
-        width = 340
-        height = 145
-        wrap_len = 220
-        
+        width, height, wrap_len = 340, 145, 220
         if len(message) > 100 or message.count('\n') > 1:
-            width = 400
-            height = 180
-            wrap_len = 280
+            width, height, wrap_len = 400, 180, 280
         
         msg_box.update_idletasks() 
         x = self.winfo_x() + (self.winfo_width() // 2) - (width // 2)
@@ -652,3 +651,4 @@ class CriptoApp(ctk.CTk):
 if __name__ == "__main__":
     app = CriptoApp()
     app.mainloop()
+
