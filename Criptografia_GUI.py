@@ -2,6 +2,7 @@ import customtkinter as ctk
 import tkinter.filedialog as filedialog
 import math
 import random
+import re
 from PIL import ImageGrab, ImageFilter, ImageEnhance
 
 # Lógica matemática RSA
@@ -34,8 +35,8 @@ class CriptoApp(ctk.CTk):
         super().__init__()
 
         self.title("CriptoRSA - Desktop Edition")
-        self.geometry("1300x650")
-        self.minsize(1000, 600)
+        self.geometry("1300x730")
+        self.minsize(1100, 680)
 
         # Configurar grid (4 columnas proporcionales)
         self.grid_columnconfigure((0, 1, 2, 3), weight=1)
@@ -48,25 +49,40 @@ class CriptoApp(ctk.CTk):
         self.lbl_title = ctk.CTkLabel(self, text="🔒 CriptoRSA", font=ctk.CTkFont(family="Outfit", size=32, weight="bold"))
         self.lbl_title.grid(row=0, column=0, columnspan=4, pady=(20, 10))
 
+        # Botón de Cambio de Tema
+        self.btn_theme = ctk.CTkButton(self, text="☼", width=36, height=36, corner_radius=8,
+                                       fg_color=("gray86", "gray17"), hover_color=("gray75", "gray25"), 
+                                       text_color=("black", "white"), font=ctk.CTkFont(size=20), 
+                                       command=self.toggle_theme)
+        self.btn_theme.place(x=20, y=20)
+
         # --- PANEL 1: GENERACIÓN DE CLAVES ---
         self.frame_keys = ctk.CTkFrame(self, corner_radius=15)
         self.frame_keys.grid(row=1, column=1, padx=15, pady=15, sticky="nsew")
         
         ctk.CTkLabel(self.frame_keys, text="Generar Claves", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=15)
 
+        frame_primes_lbl = ctk.CTkFrame(self.frame_keys, fg_color="transparent")
+        frame_primes_lbl.pack(fill="x", padx=20)
+        ctk.CTkLabel(frame_primes_lbl, text="Ingresa dos primos:").pack(side="left")
+        self.btn_rand_primes = ctk.CTkButton(frame_primes_lbl, text="🎲 Auto", width=60, height=24, corner_radius=4, fg_color=("#f3e8ff", "#4c1d95"), hover_color=("#e9d5ff", "#581c87"), text_color=("black", "white"), border_width=1, border_color="#a855f7", command=self.generate_random_primes)
+        self.btn_rand_primes.pack(side="right")
+
         self.entry_p = ctk.CTkEntry(self.frame_keys, placeholder_text="Primo p", height=40)
-        self.entry_p.pack(pady=10, padx=20, fill="x")
+        self.entry_p.pack(pady=(5, 10), padx=20, fill="x")
         self.entry_q = ctk.CTkEntry(self.frame_keys, placeholder_text="Primo q", height=40)
-        self.entry_q.pack(pady=10, padx=20, fill="x")
+        self.entry_q.pack(pady=(5, 10), padx=20, fill="x")
 
         self.btn_gen = ctk.CTkButton(self.frame_keys, text="Generar Par de Claves", height=45, fg_color="#a855f7", hover_color="#9333ea", command=self.generate_keys)
-        self.btn_gen.pack(pady=20, padx=20, fill="x")
+        self.btn_gen.pack(pady=15, padx=20, fill="x")
 
         # Resultados de claves
         self.lbl_n = ctk.CTkLabel(self.frame_keys, text="Módulo (n): -", font=ctk.CTkFont(family="Courier", size=13))
         self.lbl_n.pack(pady=2)
         self.lbl_phi = ctk.CTkLabel(self.frame_keys, text="Euler φ(n): -", font=ctk.CTkFont(family="Courier", size=13))
         self.lbl_phi.pack(pady=2)
+        self.lbl_security = ctk.CTkLabel(self.frame_keys, text="Seguridad: -", font=ctk.CTkFont(size=13, weight="bold"))
+        self.lbl_security.pack(pady=(2, 10))
         
         # Selección interactiva
         self.lbl_sel_e = ctk.CTkLabel(self.frame_keys, text="Seleccionar Exponente Pública (e):", font=ctk.CTkFont(size=13))
@@ -93,7 +109,7 @@ class CriptoApp(ctk.CTk):
         frame_msg_lbl = ctk.CTkFrame(self.frame_enc, fg_color="transparent")
         frame_msg_lbl.pack(fill="x", padx=20)
         ctk.CTkLabel(frame_msg_lbl, text="Mensaje Original:").pack(side="left")
-        self.btn_spy = ctk.CTkButton(frame_msg_lbl, text="⏳ Mensaje Espía", width=100, height=24, fg_color="#1e293b", hover_color="#334155", border_width=1, border_color="#3b82f6", command=self.generate_spy_message)
+        self.btn_spy = ctk.CTkButton(frame_msg_lbl, text="⏳ Mensaje Espía", width=100, height=24, corner_radius=4, fg_color=("#dbeafe", "#1e3a8a"), hover_color=("#bfdbfe", "#1e40af"), text_color=("black", "white"), border_width=1, border_color="#3b82f6", command=self.generate_spy_message)
         self.btn_spy.pack(side="right")
 
         self.txt_plain = ctk.CTkTextbox(self.frame_enc, height=100, wrap="word")
@@ -105,8 +121,10 @@ class CriptoApp(ctk.CTk):
         frame_res_lbl = ctk.CTkFrame(self.frame_enc, fg_color="transparent")
         frame_res_lbl.pack(fill="x", padx=20)
         ctk.CTkLabel(frame_res_lbl, text="Criptograma Resultante:").pack(side="left")
-        self.btn_calc = ctk.CTkButton(frame_res_lbl, text="📊 Ver Cálculos", width=100, height=24, fg_color="#064e3b", hover_color="#065f46", border_width=1, border_color="#10b981", command=self.show_calculations)
-        self.btn_calc.pack(side="right")
+        self.btn_copy_cipher = ctk.CTkButton(frame_res_lbl, text="📋 Copiar", width=60, height=24, corner_radius=4, fg_color=("#e2e8f0", "#1e293b"), hover_color=("#cbd5e1", "#334155"), text_color=("black", "white"), border_width=1, border_color="#64748b", command=lambda: self.copy_to_clipboard(self.txt_cipher_out.get("0.0", "end-1c")))
+        self.btn_copy_cipher.pack(side="right")
+        self.btn_calc = ctk.CTkButton(frame_res_lbl, text="📊 Ver Cálculos", width=100, height=24, corner_radius=4, fg_color=("#d1fae5", "#064e3b"), hover_color=("#a7f3d0", "#065f46"), text_color=("black", "white"), border_width=1, border_color="#10b981", command=self.show_calculations)
+        self.btn_calc.pack(side="right", padx=(0, 10))
 
         self.txt_cipher_out = ctk.CTkTextbox(self.frame_enc, height=110, text_color="#93c5fd", font=ctk.CTkFont(family="Courier"))
         self.txt_cipher_out.pack(pady=5, padx=20, fill="x")
@@ -121,7 +139,12 @@ class CriptoApp(ctk.CTk):
 
         ctk.CTkLabel(self.frame_dec, text="Descifrar Mensaje", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=15)
 
-        ctk.CTkLabel(self.frame_dec, text="Criptograma:").pack(anchor="w", padx=20)
+        frame_cipher_in_lbl = ctk.CTkFrame(self.frame_dec, fg_color="transparent")
+        frame_cipher_in_lbl.pack(fill="x", padx=20)
+        ctk.CTkLabel(frame_cipher_in_lbl, text="Criptograma:").pack(side="left")
+        self.btn_load = ctk.CTkButton(frame_cipher_in_lbl, text="📂 Cargar Archivo", width=100, height=24, corner_radius=4, fg_color=("#fef3c7", "#78350f"), hover_color=("#fde68a", "#92400e"), text_color=("black", "white"), border_width=1, border_color="#f59e0b", command=self.load_from_file)
+        self.btn_load.pack(side="right")
+        
         self.txt_cipher_in = ctk.CTkTextbox(self.frame_dec, height=80, font=ctk.CTkFont(family="Courier"))
         self.txt_cipher_in.pack(pady=5, padx=20, fill="x")
 
@@ -133,7 +156,12 @@ class CriptoApp(ctk.CTk):
         self.btn_dec = ctk.CTkButton(self.frame_dec, text="🔓 Descifrar", height=45, fg_color="#ef4444", hover_color="#dc2626", command=self.decrypt_message)
         self.btn_dec.pack(pady=20, padx=20, fill="x")
 
-        ctk.CTkLabel(self.frame_dec, text="Texto Recuperado:").pack(anchor="w", padx=20)
+        frame_out_lbl = ctk.CTkFrame(self.frame_dec, fg_color="transparent")
+        frame_out_lbl.pack(fill="x", padx=20)
+        ctk.CTkLabel(frame_out_lbl, text="Texto Recuperado:").pack(side="left")
+        self.btn_copy_plain = ctk.CTkButton(frame_out_lbl, text="📋 Copiar", width=60, height=24, corner_radius=4, fg_color=("#e2e8f0", "#1e293b"), hover_color=("#cbd5e1", "#334155"), text_color=("black", "white"), border_width=1, border_color="#64748b", command=lambda: self.copy_to_clipboard(self.txt_plain_out.get("0.0", "end-1c")))
+        self.btn_copy_plain.pack(side="right")
+
         self.txt_plain_out = ctk.CTkTextbox(self.frame_dec, height=100, font=ctk.CTkFont(size=16, weight="bold"), wrap="word")
         self.txt_plain_out.pack(pady=5, padx=20, fill="x")
 
@@ -155,6 +183,15 @@ class CriptoApp(ctk.CTk):
 
 
     # --- LÓGICA DE EVENTOS ---
+    def toggle_theme(self):
+        current_mode = ctk.get_appearance_mode()
+        if current_mode == "Dark":
+            ctk.set_appearance_mode("Light")
+            self.btn_theme.configure(text="☾")
+        else:
+            ctk.set_appearance_mode("Dark")
+            self.btn_theme.configure(text="☼")
+
     def update_console(self):
         self.txt_console.configure(state="normal")
         self.txt_console.delete("0.0", "end")
@@ -255,6 +292,13 @@ class CriptoApp(ctk.CTk):
             # Actualizar interfaz simple
             self.lbl_n.configure(text=f"Módulo (n): {n}")
             self.lbl_phi.configure(text=f"Euler φ(n): {phi}")
+            
+            if n < 1000:
+                self.lbl_security.configure(text="Seguridad: Muy Débil 🔴", text_color="#ef4444")
+            elif n < 50000:
+                self.lbl_security.configure(text="Seguridad: Moderada 🟡", text_color="#f59e0b")
+            else:
+                self.lbl_security.configure(text="Seguridad: Fuerte 🟢", text_color="#10b981")
 
             # Poblar y activar comboboxes
             self.combo_e.configure(values=[str(x) for x in possible_e], state="normal")
@@ -367,6 +411,63 @@ class CriptoApp(ctk.CTk):
         ]
         self.txt_plain.delete("0.0", "end")
         self.txt_plain.insert("0.0", random.choice(messages))
+
+    def generate_random_primes(self):
+        def get_random_prime(min_val, max_val):
+            while True:
+                num = random.randint(min_val, max_val)
+                if is_prime(num):
+                    return num
+        p = get_random_prime(50, 500)
+        q = get_random_prime(50, 500)
+        while p == q:
+            q = get_random_prime(50, 500)
+            
+        self.entry_p.delete(0, 'end')
+        self.entry_p.insert(0, str(p))
+        self.entry_q.delete(0, 'end')
+        self.entry_q.insert(0, str(q))
+
+    def load_from_file(self):
+        file_path = filedialog.askopenfilename(
+            defaultextension=".txt",
+            filetypes=[("Archivos de texto", "*.txt"), ("Todos los archivos", "*.*")],
+            title="Cargar Criptograma y Claves"
+        )
+        if file_path:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                
+                # Extraer criptograma
+                cipher_match = re.search(r"--- MENSAJE CIFRADO \(CRIPTOGRAMA\) ---\n(.*?)\n\n---", content, re.DOTALL)
+                if cipher_match:
+                    cipher_text = cipher_match.group(1).strip()
+                    self.txt_cipher_in.delete("0.0", "end")
+                    self.txt_cipher_in.insert("0.0", cipher_text)
+                
+                # Extraer n
+                n_match = re.search(r"Módulo \(n\):\s*(\d+)", content)
+                if n_match:
+                    self.entry_n.delete(0, 'end')
+                    self.entry_n.insert(0, n_match.group(1))
+                    
+                # Extraer d
+                d_match = re.search(r"Clave Privada \(d\):\s*(\d+)", content)
+                if d_match:
+                    self.entry_d.delete(0, 'end')
+                    self.entry_d.insert(0, d_match.group(1))
+                    
+                self.show_message("Éxito", "Archivo cargado correctamente.", "success")
+            except Exception as err:
+                self.show_message("Error", f"No se pudo leer el archivo:\n{err}", "error")
+
+    def copy_to_clipboard(self, text):
+        if text.strip():
+            self.clipboard_clear()
+            self.clipboard_append(text)
+            self.update()
+            self.show_message("Copiado", "Texto copiado al portapapeles exitosamente.", "success")
 
     def show_calculations(self):
         if not hasattr(self, 'last_encryption_trace') or not self.last_encryption_trace:
@@ -497,6 +598,7 @@ class CriptoApp(ctk.CTk):
                 pass
             win.destroy()
             backdrop.destroy()
+            self.focus_force()
 
         btn_close = ctk.CTkButton(main_frame, text="Cerrar Tabla", height=45, font=ctk.CTkFont(weight="bold", size=15), fg_color="#4b5563", hover_color="#374151", command=close_modal)
         btn_close.pack(padx=30, pady=(10, 25), fill="x")
