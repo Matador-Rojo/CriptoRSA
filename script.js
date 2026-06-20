@@ -12,9 +12,27 @@ const state = {
 };
 
 function showMessage(title, body) {
+  const modal = $('modal');
+  const modalBody = $('modalBody');
+
   $('modalTitle').textContent = title;
-  $('modalBody').textContent = body;
-  $('modal').showModal();
+  modalBody.classList.remove('table-mode');
+  modalBody.innerHTML = '';
+  modalBody.textContent = body;
+
+  if (!modal.open) modal.showModal();
+}
+
+function showCustomModal(title, element) {
+  const modal = $('modal');
+  const modalBody = $('modalBody');
+
+  $('modalTitle').textContent = title;
+  modalBody.classList.add('table-mode');
+  modalBody.innerHTML = '';
+  modalBody.appendChild(element);
+
+  if (!modal.open) modal.showModal();
 }
 
 function isPrime(num) {
@@ -335,17 +353,56 @@ function loadFromFile(event) {
   reader.readAsText(file, 'UTF-8');
 }
 
+function formatCharacter(char) {
+  if (char === ' ') return '(espacio)';
+  if (char === '\n') return '(salto de línea)';
+  if (char === '\t') return '(tabulación)';
+  return char;
+}
+
+function createCell(text, className = '') {
+  const cell = document.createElement('td');
+  cell.textContent = text;
+  if (className) cell.className = className;
+  return cell;
+}
+
 function showCalculations() {
   if (!state.encryptionTrace.length) {
     showMessage('Atención', 'Primero cifra un mensaje para ver los cálculos.');
     return;
   }
 
-  const lines = state.encryptionTrace.map((item) => {
-    return `Carácter: ${item.char}\nASCII/Unicode: ${item.m}\nOperación: ${item.eq}\nResultado cifrado: ${item.c}`;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'calc-table-wrapper';
+
+  const table = document.createElement('table');
+  table.className = 'calc-table';
+
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  ['N°', 'Carácter', 'ASCII/Unicode', 'Operación RSA', 'Resultado cifrado'].forEach((title) => {
+    const th = document.createElement('th');
+    th.textContent = title;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+
+  const tbody = document.createElement('tbody');
+  state.encryptionTrace.forEach((item, index) => {
+    const row = document.createElement('tr');
+    row.appendChild(createCell((index + 1).toString()));
+    row.appendChild(createCell(formatCharacter(item.char), 'calc-character'));
+    row.appendChild(createCell(item.m.toString()));
+    row.appendChild(createCell(item.eq));
+    row.appendChild(createCell(item.c.toString(), 'calc-result'));
+    tbody.appendChild(row);
   });
 
-  showMessage('Cálculos del cifrado', lines.join('\n\n--------------------\n\n'));
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  wrapper.appendChild(table);
+  showCustomModal('Cálculos del cifrado', wrapper);
 }
 
 $('themeBtn').addEventListener('click', () => {
