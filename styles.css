@@ -1,10 +1,10 @@
 :root {
   --bg: #0f172a;
-  --panel: #111827;
-  --panel-soft: #1f2937;
+  --panel: rgba(17, 24, 39, 0.76);
+  --panel-soft: rgba(31, 41, 55, 0.82);
   --text: #e5e7eb;
   --muted: #94a3b8;
-  --border: #334155;
+  --border: rgba(148, 163, 184, 0.26);
   --purple: #a855f7;
   --purple-hover: #9333ea;
   --blue: #3b82f6;
@@ -17,11 +17,11 @@
 
 body.light {
   --bg: #f1f5f9;
-  --panel: #ffffff;
-  --panel-soft: #e2e8f0;
+  --panel: rgba(255, 255, 255, 0.78);
+  --panel-soft: rgba(226, 232, 240, 0.82);
   --text: #0f172a;
   --muted: #475569;
-  --border: #cbd5e1;
+  --border: rgba(100, 116, 139, 0.28);
 }
 
 * {
@@ -31,13 +31,19 @@ body.light {
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background: radial-gradient(circle at top, #1e1b4b, var(--bg) 45%);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(168, 85, 247, 0.28), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(59, 130, 246, 0.22), transparent 30%),
+    linear-gradient(135deg, #111827 0%, #0f172a 55%, #020617 100%);
   color: var(--text);
   min-height: 100vh;
 }
 
 body.light {
-  background: radial-gradient(circle at top, #dbeafe, var(--bg) 45%);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(168, 85, 247, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 12%, rgba(59, 130, 246, 0.18), transparent 30%),
+    linear-gradient(135deg, #dbeafe 0%, #f8fafc 55%, #e2e8f0 100%);
 }
 
 .app {
@@ -56,6 +62,7 @@ body.light {
   margin: 0;
   font-size: clamp(2.1rem, 4vw, 3.1rem);
   letter-spacing: 0.5px;
+  text-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
 }
 
 .header p {
@@ -69,12 +76,14 @@ body.light {
   left: 0;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: rgba(15, 23, 42, 0.42);
   color: var(--text);
   font-size: 1.25rem;
   cursor: pointer;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .grid {
@@ -85,11 +94,13 @@ body.light {
 }
 
 .card {
-  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 24px 20px;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
 }
 
 .card h2 {
@@ -116,6 +127,7 @@ textarea {
   padding: 12px;
   outline: none;
   font-size: 0.95rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 input + input,
@@ -224,35 +236,111 @@ pre {
 #console {
   white-space: pre-wrap;
   min-height: 470px;
-  background: var(--panel-soft);
+  background: rgba(31, 41, 55, 0.66);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
   overflow: auto;
   color: var(--text);
   line-height: 1.45;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 dialog {
-  width: min(720px, 92vw);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--panel);
+  width: min(980px, 92vw);
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  border-radius: 20px;
+  background: rgba(17, 24, 39, 0.72);
   color: var(--text);
-  padding: 22px;
+  padding: 24px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+
+body.light dialog {
+  background: rgba(255, 255, 255, 0.78);
 }
 
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(2, 6, 23, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+dialog h3 {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
 }
 
 #modalBody {
-  max-height: 55vh;
+  max-height: 60vh;
   overflow: auto;
   white-space: pre-wrap;
-  background: var(--panel-soft);
-  border-radius: 12px;
-  padding: 14px;
+  background: rgba(31, 41, 55, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  padding: 16px;
+  line-height: 1.45;
+}
+
+body.light #modalBody {
+  background: rgba(226, 232, 240, 0.72);
+}
+
+#modalBody.table-mode {
+  padding: 0;
+  white-space: normal;
+}
+
+.calc-table-wrapper {
+  overflow: auto;
+  border-radius: 14px;
+}
+
+.calc-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 0.92rem;
+}
+
+.calc-table th,
+.calc-table td {
+  padding: 13px 14px;
+  text-align: left;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  vertical-align: top;
+}
+
+.calc-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(15, 23, 42, 0.92);
+  color: #bfdbfe;
+  font-weight: 800;
+}
+
+body.light .calc-table th {
+  background: rgba(226, 232, 240, 0.95);
+  color: #1d4ed8;
+}
+
+.calc-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.calc-character {
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.calc-result {
+  font-weight: 800;
+  color: #34d399;
 }
 
 @media (max-width: 1150px) {
@@ -290,5 +378,14 @@ dialog::backdrop {
   .small,
   .file-label {
     width: auto;
+  }
+
+  dialog {
+    padding: 18px;
+  }
+
+  .calc-table {
+    min-width: 680px;
+    font-size: 0.85rem;
   }
 }
