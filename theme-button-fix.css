@@ -1,0 +1,33 @@
+/* Corrección del área clickeable del botón de tema.
+   Este archivo se carga al final para que el botón quede por encima del header y de los efectos visuales. */
+
+.theme-btn {
+  position: absolute;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  line-height: 1;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.theme-btn::after {
+  pointer-events: none;
+}
+
+.header {
+  z-index: 1;
+}
+
+@media (max-width: 720px) {
+  .theme-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
