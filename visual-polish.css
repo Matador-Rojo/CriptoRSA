@@ -1,0 +1,338 @@
+/* Capa extra de detalles visuales para CriptoRSA.
+   Se puede quitar eliminando el enlace a este archivo en index.html. */
+
+:root {
+  --ring-blue: rgba(59, 130, 246, 0.38);
+  --ring-purple: rgba(168, 85, 247, 0.38);
+  --glow-soft: rgba(59, 130, 246, 0.16);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::before {
+  background:
+    radial-gradient(circle at 12% 24%, rgba(168, 85, 247, 0.22), transparent 24%),
+    radial-gradient(circle at 80% 26%, rgba(59, 130, 246, 0.18), transparent 26%),
+    radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.08), transparent 30%);
+  filter: blur(4px);
+}
+
+body::after {
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 75%, transparent);
+}
+
+body.light::before {
+  background:
+    radial-gradient(circle at 12% 24%, rgba(168, 85, 247, 0.16), transparent 24%),
+    radial-gradient(circle at 80% 26%, rgba(59, 130, 246, 0.16), transparent 26%),
+    radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.10), transparent 30%);
+}
+
+body.light::after {
+  opacity: 0.24;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.07) 1px, transparent 1px);
+}
+
+.app {
+  z-index: 1;
+}
+
+.header {
+  position: relative;
+}
+
+.header::after {
+  content: "";
+  display: block;
+  width: min(420px, 70vw);
+  height: 1px;
+  margin: 18px auto 0;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.65), rgba(168, 85, 247, 0.65), transparent);
+}
+
+.header h1 {
+  line-height: 1.05;
+  filter: drop-shadow(0 14px 30px rgba(59, 130, 246, 0.18));
+}
+
+.header p {
+  font-size: 1.02rem;
+}
+
+.theme-btn {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 10px 28px rgba(0, 0, 0, 0.22);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.theme-btn:hover {
+  transform: translateY(-2px) rotate(8deg);
+  border-color: rgba(96, 165, 250, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 14px 34px rgba(59, 130, 246, 0.20);
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.9), rgba(59, 130, 246, 0.9), rgba(16, 185, 129, 0.9));
+  opacity: 0.72;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.16), transparent 68%);
+  pointer-events: none;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(96, 165, 250, 0.42);
+  box-shadow:
+    0 24px 58px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(96, 165, 250, 0.06);
+}
+
+body.light .card:hover {
+  box-shadow:
+    0 24px 54px rgba(15, 23, 42, 0.14),
+    0 0 0 1px rgba(37, 99, 235, 0.06);
+}
+
+.card h2 {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: 0.2px;
+}
+
+.card h2::before {
+  content: "🧾";
+  font-size: 1rem;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.24));
+}
+
+.grid .card:nth-child(2) h2::before { content: "🔑"; }
+.grid .card:nth-child(3) h2::before { content: "🔐"; }
+.grid .card:nth-child(4) h2::before { content: "🔓"; }
+
+.card h2::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 46px;
+  height: 3px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--purple), var(--blue));
+  opacity: 0.85;
+}
+
+input,
+select,
+textarea,
+#console,
+#modalBody {
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(96, 165, 250, 0.72);
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.light input:focus,
+body.light select:focus,
+body.light textarea:focus {
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+button,
+.file-label {
+  position: relative;
+  overflow: hidden;
+}
+
+button::after,
+.file-label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.18) 45%, transparent 70%);
+  transform: translateX(-130%);
+  transition: transform 0.45s ease;
+  pointer-events: none;
+}
+
+button:hover::after,
+.file-label:hover::after {
+  transform: translateX(130%);
+}
+
+.primary,
+.small,
+.file-label {
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+}
+
+.primary.purple,
+.small.purple {
+  background: linear-gradient(135deg, #a855f7, #c084fc);
+}
+
+.primary.blue-bg,
+.small.blue-bg {
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+}
+
+.primary.green-bg,
+.small.green-bg {
+  background: linear-gradient(135deg, #059669, #34d399);
+}
+
+.primary.red-bg,
+.small.red-bg {
+  background: linear-gradient(135deg, #dc2626, #fb7185);
+}
+
+.security {
+  display: block;
+  width: fit-content;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.10);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+}
+
+body.light .security {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+#console {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 38px rgba(0, 0, 0, 0.16);
+}
+
+#console::-webkit-scrollbar,
+textarea::-webkit-scrollbar,
+#modalBody::-webkit-scrollbar,
+.calc-table-wrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+#console::-webkit-scrollbar-thumb,
+textarea::-webkit-scrollbar-thumb,
+#modalBody::-webkit-scrollbar-thumb,
+.calc-table-wrapper::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.55), rgba(168, 85, 247, 0.55));
+  border: 2px solid rgba(15, 23, 42, 0.65);
+}
+
+body.light #console::-webkit-scrollbar-thumb,
+body.light textarea::-webkit-scrollbar-thumb,
+body.light #modalBody::-webkit-scrollbar-thumb,
+body.light .calc-table-wrapper::-webkit-scrollbar-thumb {
+  border-color: rgba(241, 245, 249, 0.9);
+}
+
+#cipherOut,
+#plainOut {
+  min-height: 112px;
+}
+
+#modal {
+  overflow: hidden;
+}
+
+#modal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--purple), var(--blue), var(--green));
+}
+
+.calc-table th {
+  letter-spacing: 0.2px;
+}
+
+.calc-table td:nth-child(1) {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.calc-table tbody tr:nth-child(even) {
+  background: rgba(148, 163, 184, 0.045);
+}
+
+body.light .calc-table tbody tr:nth-child(even) {
+  background: rgba(100, 116, 139, 0.065);
+}
+
+@media (max-width: 720px) {
+  .header::after {
+    margin-top: 14px;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+
+  .theme-btn:hover {
+    transform: none;
+  }
+}
