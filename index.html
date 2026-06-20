@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CriptoRSA - Web Edition</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <button id="themeBtn" class="theme-btn" title="Cambiar tema">☼</button>
+    <header class="header">
+      <h1>🔒 CriptoRSA</h1>
+      <p>Versión web para generar claves, cifrar y descifrar mensajes con RSA.</p>
+    </header>
+
+    <section class="grid">
+      <article class="card process-card">
+        <h2>Proceso Detallado</h2>
+        <pre id="console">&gt; Esperando generación de claves...</pre>
+      </article>
+
+      <article class="card">
+        <h2>Generar Claves</h2>
+        <div class="row-title">
+          <label>Ingresa dos primos:</label>
+          <button id="autoPrimes" class="small purple">🎲 Auto</button>
+        </div>
+        <input id="p" type="number" placeholder="Primo p" />
+        <input id="q" type="number" placeholder="Primo q" />
+        <button id="generateKeys" class="primary purple">Generar Par de Claves</button>
+
+        <p id="nLabel" class="mono">Módulo (n): -</p>
+        <p id="phiLabel" class="mono">Euler φ(n): -</p>
+        <p id="securityLabel" class="security">Seguridad: -</p>
+
+        <label>Seleccionar Exponente Público (e):</label>
+        <select id="selectE" disabled></select>
+
+        <label>Seleccionar Clave Privada (d):</label>
+        <select id="selectD" disabled></select>
+
+        <p id="eLabel" class="mono blue">Pública (e): -</p>
+        <p id="dLabel" class="mono red">Privada (d): -</p>
+      </article>
+
+      <article class="card">
+        <h2>Cifrar Mensaje</h2>
+        <div class="row-title">
+          <label>Mensaje Original:</label>
+          <button id="spyMessage" class="small blue-bg">⏳ Mensaje Espía</button>
+        </div>
+        <textarea id="plainText" placeholder="Escribe el mensaje que deseas cifrar"></textarea>
+        <button id="encrypt" class="primary blue-bg">🔒 Encriptar</button>
+
+        <div class="row-title">
+          <label>Criptograma Resultante:</label>
+          <div>
+            <button id="showCalc" class="small green-bg">📊 Ver Cálculos</button>
+            <button id="copyCipher" class="small">📋 Copiar</button>
+          </div>
+        </div>
+        <textarea id="cipherOut" class="mono output" readonly></textarea>
+        <button id="saveFile" class="primary green-bg">💾 Guardar en Archivo</button>
+      </article>
+
+      <article class="card">
+        <h2>Descifrar Mensaje</h2>
+        <div class="row-title">
+          <label>Criptograma:</label>
+          <label class="small file-label">📂 Cargar Archivo<input id="loadFile" type="file" accept=".txt" hidden /></label>
+        </div>
+        <textarea id="cipherIn" class="mono" placeholder="Pega aquí el criptograma"></textarea>
+        <input id="nInput" type="number" placeholder="Módulo (n)" />
+        <input id="dInput" type="number" placeholder="Clave Privada (d)" />
+        <button id="decrypt" class="primary red-bg">🔓 Descifrar</button>
+
+        <div class="row-title">
+          <label>Texto Recuperado:</label>
+          <button id="copyPlain" class="small">📋 Copiar</button>
+        </div>
+        <textarea id="plainOut" class="result" readonly></textarea>
+      </article>
+    </section>
+  </main>
+
+  <dialog id="modal">
+    <h3 id="modalTitle"></h3>
+    <pre id="modalBody"></pre>
+    <button id="closeModal" class="primary">Cerrar</button>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
